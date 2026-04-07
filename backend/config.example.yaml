@@ -1,0 +1,25 @@
+ocr_api:
+  key: "your-glm-api-key"
+  base_url: "https://open.bigmodel.cn/api/paas/v4/"
+
+llm_api:
+  key: "your-llm-api-key"          # 可以和 ocr_api.key 相同，也可以不同
+  provider: "glm"                   # "glm" 或 "openai"
+  base_url: "https://open.bigmodel.cn/api/paas/v4/"
+  # OpenAI 兼容示例：
+  # provider: "openai"
+  # base_url: "https://api.openai.com/v1/"
+  # base_url: "https://your-custom-endpoint/v1/"
+
+ocr:
+  model: "glm-ocr"
+  batch_size: 10
+
+llm:
+  enabled: true
+  model: "glm-4.6"                  # 或 "gpt-4o"、"gpt-4o-mini" 等
+  max_concurrent: 3                  # 最大并发 LLM 请求数
+  prompt: "清理以下OCR文本：去除页眉页脚页码，修复错误断行，保留段落结构，只输出正文内容，不要加任何说明。"
+
+output:
+  heading_format: "# Page {n}"

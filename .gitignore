@@ -7,7 +7,7 @@ __pycache__/
 
 # Claude相关
 .claude/
-.claude.md
+.CLAUDE.md
 # 临时文件
 .CLAUDE.md.swp
 .DS_Store

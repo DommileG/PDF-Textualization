@@ -1,0 +1,152 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:PDFTextualization.ViewModels"
+        x:DataType="vm:MainWindowViewModel"
+        x:Class="PDFTextualization.Views.MainWindow"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="PDFTextualization"
+        Width="800" Height="780"
+        MinWidth="620" MinHeight="520">
+
+  <DockPanel Margin="16">
+
+    <!-- ── Title ──────────────────────────────────────────────────── -->
+    <TextBlock DockPanel.Dock="Top"
+               Text="PDF Textualization"
+               FontSize="20" FontWeight="Bold"
+               Margin="0,0,0,10"/>
+
+    <!-- ── Bottom: Open Result ────────────────────────────────────── -->
+    <Button DockPanel.Dock="Bottom"
+            Content="Open Result in Default App"
+            IsVisible="{Binding CanOpenResult}"
+            Command="{Binding OpenResultCommand}"
+            Margin="0,8,0,0" HorizontalAlignment="Left"/>
+
+    <!-- ── Log output ─────────────────────────────────────────────── -->
+    <Border DockPanel.Dock="Bottom"
+            Margin="0,8,0,0"
+            BorderBrush="Gray" BorderThickness="1" CornerRadius="4"
+            Height="160">
+      <ScrollViewer>
+        <TextBox Text="{Binding LogText}"
+                 IsReadOnly="True" AcceptsReturn="True"
+                 FontFamily="Monospace" FontSize="11"
+                 TextWrapping="Wrap"
+                 Background="Transparent" BorderThickness="0"/>
+      </ScrollViewer>
+    </Border>
+
+    <!-- ── Main settings (scrollable) ────────────────────────────── -->
+    <ScrollViewer>
+      <StackPanel Spacing="6">
+
+        <!-- Input PDF -->
+        <TextBlock Text="Input PDF (scanned book)"/>
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBox Grid.Column="0" Text="{Binding InputPdf}" Watermark="Path to scanned PDF…"/>
+          <Button Grid.Column="1" Content="Browse…" Margin="6,0,0,0"
+                  Command="{Binding BrowseInputCommand}"/>
+        </Grid>
+
+        <!-- Output MD -->
+        <TextBlock Text="Output Markdown" Margin="0,4,0,0"/>
+        <Grid ColumnDefinitions="*,Auto">
+          <TextBox Grid.Column="0" Text="{Binding OutputMd}" Watermark="Output .md file path…"/>
+          <Button Grid.Column="1" Content="Browse…" Margin="6,0,0,0"
+                  Command="{Binding BrowseOutputCommand}"/>
+        </Grid>
+
+        <Separator Margin="0,8,0,4"/>
+
+        <!-- ── OCR API Settings ──────────────────────────────────── -->
+        <Expander Header="OCR API  (GLM-OCR)" IsExpanded="True">
+          <StackPanel Spacing="6" Margin="0,6,0,0">
+
+            <TextBlock Text="API Key" FontSize="12"/>
+            <TextBox Text="{Binding OcrApiKey}"
+                     PasswordChar="•"
+                     Watermark="GLM API key for OCR"/>
+
+            <TextBlock Text="Model: glm-ocr  (fixed)"
+                       FontSize="11" Foreground="Gray" Margin="0,2,0,0"/>
+          </StackPanel>
+        </Expander>
+
+        <!-- ── LLM API Settings ──────────────────────────────────── -->
+        <Expander Header="LLM API  (text cleanup)" IsExpanded="True">
+          <StackPanel Spacing="6" Margin="0,6,0,0">
+
+            <!-- Provider selector -->
+            <TextBlock Text="Provider" FontSize="12"/>
+            <ComboBox SelectedItem="{Binding LlmProvider}"
+                      HorizontalAlignment="Left" MinWidth="200">
+              <ComboBoxItem>GLM</ComboBoxItem>
+              <ComboBoxItem>OpenAI Compatible</ComboBoxItem>
+            </ComboBox>
+
+            <!-- API Key -->
+            <TextBlock Text="API Key" FontSize="12" Margin="0,4,0,0"/>
+            <TextBox Text="{Binding LlmApiKey}"
+                     PasswordChar="•"
+                     Watermark="Leave empty to reuse OCR API key"/>
+
+            <!-- Base URL — only shown for OpenAI Compatible -->
+            <TextBlock Text="Base URL" FontSize="12" Margin="0,4,0,0"
+                       IsVisible="{Binding IsLlmBaseUrlVisible}"/>
+            <TextBox Text="{Binding LlmBaseUrl}"
+                     IsVisible="{Binding IsLlmBaseUrlVisible}"
+                     Watermark="https://api.openai.com/v1/"/>
+
+            <!-- Model name -->
+            <TextBlock Text="Model Name" FontSize="12" Margin="0,4,0,0"/>
+            <TextBox Text="{Binding LlmModel}"
+                     Watermark="e.g. glm-4.6 / gpt-4o / gpt-4o-mini"/>
+
+            <CheckBox IsChecked="{Binding LlmEnabled}"
+                      Content="Enable LLM cleanup pass"
+                      Margin="0,4,0,0"/>
+
+          </StackPanel>
+        </Expander>
+
+        <!-- ── Other settings ───────────────────────────────────── -->
+        <Expander Header="Other Settings" IsExpanded="False">
+          <StackPanel Spacing="6" Margin="0,6,0,0">
+            <TextBlock Text="Page Range (e.g. 1-50, leave empty for all)" FontSize="12"/>
+            <TextBox Text="{Binding PageRange}" Watermark="all pages"/>
+            <TextBlock Text="LLM Max Concurrent Requests" FontSize="12" Margin="0,4,0,0"/>
+            <NumericUpDown Value="{Binding LlmMaxConcurrent}"
+                           Minimum="1" Maximum="20" Increment="1"
+                           HorizontalAlignment="Left" MinWidth="120"/>
+          </StackPanel>
+        </Expander>
+
+        <Separator Margin="0,8,0,4"/>
+
+        <!-- ── Action row ────────────────────────────────────────── -->
+        <Grid ColumnDefinitions="*,12,Auto,12,Auto">
+          <ProgressBar Grid.Column="0"
+                       Value="{Binding ProgressValue}"
+                       Maximum="{Binding ProgressMax}"
+                       Height="28"/>
+          <Button Grid.Column="2"
+                  Content="▶  Start"
+                  IsEnabled="{Binding !IsRunning}"
+                  Command="{Binding StartCommand}"
+                  Classes="accent"
+                  Padding="16,6"/>
+          <Button Grid.Column="4"
+                  Content="■  Stop"
+                  IsEnabled="{Binding IsRunning}"
+                  Command="{Binding StopCommand}"
+                  Padding="16,6"/>
+        </Grid>
+
+        <TextBlock Text="{Binding StatusText}" FontSize="12" Foreground="Gray"/>
+
+      </StackPanel>
+    </ScrollViewer>
+
+  </DockPanel>
+</Window>
