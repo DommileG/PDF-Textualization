@@ -2,7 +2,15 @@
 __pycache__/
 *.py[codz]
 *$py.class
+# IDE相关
+.idea/
 
+# Claude相关
+.claude/
+.claude.md
+# 临时文件
+.CLAUDE.md.swp
+.DS_Store
 # C extensions
 *.so
 
